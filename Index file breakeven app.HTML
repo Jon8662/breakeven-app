@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Jonathan's Breakeven App - Calculate the number of units needed to break even." />
+  <title>Jonathan's Breakeven App</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --border: #d9e0ea;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #15803d;
+      --success-bg: #ecfdf3;
+      --error: #b42318;
+      --error-bg: #fef3f2;
+      --shadow: 0 14px 35px rgba(15, 23, 42, 0.09);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(145deg, #eef4ff 0%, var(--bg) 42%, #f8fafc 100%);
+    }
+
+    .page {
+      width: min(100%, 1000px);
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 10px auto 0;
+      max-width: 650px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .app-card {
+      background: var(--card);
+      border: 1px solid rgba(217, 224, 234, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .panel {
+      padding: 32px;
+    }
+
+    .panel + .panel {
+      border-left: 1px solid var(--border);
+      background: #fbfcfe;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+    }
+
+    .panel-description {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      min-height: 50px;
+      padding: 12px 14px 12px 34px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      font-size: 1rem;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .unit-hint {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    button {
+      width: 100%;
+      min-height: 52px;
+      margin-top: 6px;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      background: var(--primary);
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    button:active { transform: translateY(0); }
+
+    .result-box {
+      min-height: 215px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border: 1px dashed #c8d2e1;
+      border-radius: 16px;
+      padding: 28px 20px;
+      background: white;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .result-number {
+      margin: 10px 0 6px;
+      font-size: clamp(3rem, 7vw, 4.8rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .result-text {
+      margin: 0;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .formula {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #f0f5ff;
+      border: 1px solid #dbe7ff;
+      color: #29436a;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .message {
+      display: none;
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .message.error {
+      display: block;
+      color: var(--error);
+      background: var(--error-bg);
+      border: 1px solid #fecdca;
+    }
+
+    .message.success {
+      display: block;
+      color: var(--success);
+      background: var(--success-bg);
+      border: 1px solid #abefc6;
+    }
+
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 700px) {
+      .page { padding: 24px 14px 36px; }
+      .content { grid-template-columns: 1fr; }
+      .panel { padding: 24px 20px; }
+      .panel + .panel {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+    }
+
+    @media (max-width: 420px) {
+      h1 { font-size: 2rem; }
+      .subtitle { font-size: 0.92rem; }
+      .panel { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>Jonathan's Breakeven App</h1>
+      <p class="subtitle">
+        Enter your fixed cost, variable cost per unit, and sales price per unit to calculate how many units you need to sell to break even.
+      </p>
+    </header>
+
+    <section class="app-card" aria-label="Breakeven calculator">
+      <div class="content">
+        <div class="panel">
+          <h2>Enter your numbers</h2>
+          <p class="panel-description">Use positive dollar amounts for each value.</p>
+
+          <form id="breakevenForm" novalidate>
+            <div class="field">
+              <label for="fixedCost">Fixed Cost</label>
+              <div class="input-wrap">
+                <span class="prefix">$</span>
+                <input id="fixedCost" name="fixedCost" type="number" min="0" step="0.01" placeholder="5000" inputmode="decimal" required />
+              </div>
+              <span class="unit-hint">Total fixed costs</span>
+            </div>
+
+            <div class="field">
+              <label for="variableCost">Variable Cost per Unit</label>
+              <div class="input-wrap">
+                <span class="prefix">$</span>
+                <input id="variableCost" name="variableCost" type="number" min="0" step="0.01" placeholder="20" inputmode="decimal" required />
+              </div>
+              <span class="unit-hint">Cost that changes with each unit sold</span>
+            </div>
+
+            <div class="field">
+              <label for="salesPrice">Sales Price per Unit</label>
+              <div class="input-wrap">
+                <span class="prefix">$</span>
+                <input id="salesPrice" name="salesPrice" type="number" min="0" step="0.01" placeholder="50" inputmode="decimal" required />
+              </div>
+              <span class="unit-hint">Revenue received for each unit sold</span>
+            </div>
+
+            <button type="submit">Calculate Breakeven</button>
+            <div id="message" class="message" role="alert" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>Breakeven Result</h2>
+          <p class="panel-description">Your result will appear here after you submit the values.</p>
+
+          <div class="result-box" aria-live="polite">
+            <div class="result-label">Units to Break Even</div>
+            <div id="resultNumber" class="result-number">—</div>
+            <p id="resultText" class="result-text">Enter your values and click Calculate Breakeven.</p>
+          </div>
+
+          <div class="formula">
+            Breakeven Units = Fixed Cost ÷ (Sales Price per Unit − Variable Cost per Unit)
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>Jonathan's Breakeven App</footer>
+  </main>
+
+  <script>
+    (function () {
+      const form = document.getElementById('breakevenForm');
+      const fixedCostInput = document.getElementById('fixedCost');
+      const variableCostInput = document.getElementById('variableCost');
+      const salesPriceInput = document.getElementById('salesPrice');
+      const resultNumber = document.getElementById('resultNumber');
+      const resultText = document.getElementById('resultText');
+      const message = document.getElementById('message');
+
+      function showMessage(text, type) {
+        message.textContent = text;
+        message.className = 'message ' + type;
+      }
+
+      function clearMessage() {
+        message.textContent = '';
+        message.className = 'message';
+      }
+
+      function formatNumber(value) {
+        return new Intl.NumberFormat('en-US', {
+          maximumFractionDigits: 0
+        }).format(value);
+      }
+
+      function calculateBreakeven(event) {
+        event.preventDefault();
+        clearMessage();
+
+        const fixedCost = Number(fixedCostInput.value);
+        const variableCost = Number(variableCostInput.value);
+        const salesPrice = Number(salesPriceInput.value);
+
+        if (!Number.isFinite(fixedCost) || !Number.isFinite(variableCost) || !Number.isFinite(salesPrice)) {
+          showMessage('Please enter a valid number in all three fields.', 'error');
+          return;
+        }
+
+        if (fixedCost < 0 || variableCost < 0 || salesPrice < 0) {
+          showMessage('Please enter values that are zero or greater.', 'error');
+          return;
+        }
+
+        const contributionMargin = salesPrice - variableCost;
+
+        if (contributionMargin <= 0) {
+          resultNumber.textContent = 'N/A';
+          resultText.textContent = 'Breakeven cannot be reached because the sales price must be greater than the variable cost per unit.';
+          showMessage('Sales Price per Unit must be greater than Variable Cost per Unit.', 'error');
+          return;
+        }
+
+        const exactUnits = fixedCost / contributionMargin;
+        const breakevenUnits = Math.ceil(exactUnits);
+
+        resultNumber.textContent = formatNumber(breakevenUnits);
+        resultText.textContent = breakevenUnits === 1
+          ? 'unit must be sold to break even.'
+          : 'units must be sold to break even.';
+
+        showMessage(
+          'Contribution margin per unit: $' + contributionMargin.toFixed(2) + '. The result is rounded up to the next whole unit.',
+          'success'
+        );
+      }
+
+      form.addEventListener('submit', calculateBreakeven);
+    })();
+  </script>
+</body>
+</html>
